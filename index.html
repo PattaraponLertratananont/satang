@@ -429,7 +429,7 @@ select.form-input { cursor: pointer; }
         <label class="form-label">Client ID (API Key)</label>
         <input type="text" id="bot-key-settings" class="form-input" placeholder="ใส่ API Key ธนาคารแห่งประเทศไทย" oninput="syncBotKey()">
         <div style="font-size:12px;color:var(--muted);margin-top:6px;">
-          สมัครได้ที่ <a href="https://apigw1.bot.or.th" style="color:var(--gold);" target="_blank">apigw1.bot.or.th</a>
+          สมัครและรับ API Key ได้ที่ <a href="https://portal.api.bot.or.th" style="color:var(--gold);" target="_blank">portal.api.bot.or.th</a>
         </div>
       </div>
     </div>
@@ -495,15 +495,15 @@ let state = {
   existingSavings: 0,
 };
 
-// ── Fallback holidays (BOT data) ──
+// ── Fallback holidays (BOT data — updated with special holidays) ──
 const FALLBACK = [
   '2024-01-01','2024-02-26','2024-04-06','2024-04-08','2024-04-12','2024-04-15','2024-04-16',
   '2024-05-01','2024-05-06','2024-05-10','2024-05-22','2024-06-03','2024-07-22','2024-07-29',
   '2024-08-12','2024-10-14','2024-10-23','2024-12-05','2024-12-10','2024-12-31',
   '2025-01-01','2025-02-12','2025-04-06','2025-04-07','2025-04-08','2025-04-14','2025-04-15',
-  '2025-05-01','2025-05-05','2025-06-03','2025-07-10','2025-07-28','2025-08-12',
-  '2025-10-13','2025-10-23','2025-12-05','2025-12-10','2025-12-31',
-  '2026-01-01','2026-03-03','2026-04-06','2026-04-13','2026-04-14','2026-04-15',
+  '2025-05-01','2025-05-05','2025-06-02','2025-06-03','2025-07-10','2025-07-28',
+  '2025-08-11','2025-08-12','2025-10-13','2025-10-23','2025-12-05','2025-12-10','2025-12-31',
+  '2026-01-01','2026-01-02','2026-03-03','2026-04-06','2026-04-13','2026-04-14','2026-04-15',
   '2026-05-01','2026-05-04','2026-05-25','2026-07-28','2026-08-12',
   '2026-10-13','2026-10-23','2026-12-05','2026-12-10','2026-12-31',
 ];
@@ -600,16 +600,20 @@ async function fetchHolidays() {
   if (!key) { status.textContent = 'กรุณาใส่ API Key ก่อน'; status.className = 'api-status err'; return; }
   status.textContent = 'กำลังดึงข้อมูลจาก BOT...'; status.className = 'api-status';
   try {
-    const m = String(state.month + 1).padStart(2, '0');
-    const url = `https://apigw1.bot.or.th/bot/public/financial-institutions-holidays/?year=${state.year}&month=${m}`;
-    const res = await fetch(url, { headers: { 'X-IBM-Client-Id': key } });
+    // BOT API: gateway.api.bot.or.th — Authorization = raw token (no "Bearer"), year only
+    const url = `https://gateway.api.bot.or.th/financial-institutions-holidays/?year=${state.year}`;
+    const res = await fetch(url, {
+      method: 'GET',
+      headers: { 'Authorization': key, 'Accept': 'application/json' }
+    });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
     const dates = (data.result?.data || []).map(h => h.Date?.substring(0, 10)).filter(Boolean);
-    const prev = state.holidays.filter(d => !(d.startsWith(state.year) && d.substring(5, 7) === m));
+    // Replace all holidays for this year
+    const prev = state.holidays.filter(d => !d.startsWith(String(state.year)));
     state.holidays = [...prev, ...dates];
     saveData();
-    status.textContent = `ดึงสำเร็จ: ${dates.length} วันหยุด เดือน ${m}/${state.year}`;
+    status.textContent = `ดึงสำเร็จ: ${dates.length} วันหยุด ปี ${state.year}`;
     status.className = 'api-status ok';
     recalc();
   } catch(e) {
