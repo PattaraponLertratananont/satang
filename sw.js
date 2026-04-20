@@ -1,5 +1,10 @@
 const CACHE = 'khlang-ngoen-v1';
-const ASSETS = ['./index.html'];
+const ASSETS = [
+  './',
+  './index.html',
+  './manifest.json',
+  'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js' // เพิ่มตัวนี้เพื่อให้กราฟรัน Offline ได้
+];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)));
