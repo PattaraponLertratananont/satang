@@ -604,7 +604,7 @@ async function fetchHolidays() {
     const url = `https://gateway.api.bot.or.th/financial-institutions-holidays/?year=${state.year}`;
     const res = await fetch(url, {
       method: 'GET',
-      headers: { 'authorization': key, 'accept': 'application/json' },
+      headers: { 'Authorization': key, 'Accept': 'application/json' },
       referrerPolicy: "no-referrer",
       mode:"no-cors",
     });
