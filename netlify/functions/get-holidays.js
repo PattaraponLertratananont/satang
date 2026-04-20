@@ -8,8 +8,8 @@ exports.handler = async (event) => {
       `https://gateway.api.bot.or.th/financial-institutions-holidays/?year=${year}`,
       {
         headers: {
-          'accept': 'application/json',
-          'x-ibm-client-id': CLIENT_ID
+          'Accept': 'application/json',
+          'Authorization': CLIENT_ID
         }
       }
     );
