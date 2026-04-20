@@ -604,8 +604,9 @@ async function fetchHolidays() {
     const url = `https://gateway.api.bot.or.th/financial-institutions-holidays/?year=${state.year}`;
     const res = await fetch(url, {
       method: 'GET',
-      headers: { 'Authorization': key, 'Accept': 'application/json' },
-      referrer: "https://satang-wallet.netlify.app/",
+      headers: { 'authorization': key, 'accept': 'application/json' },
+      referrerPolicy: "no-referrer",
+      mode:"no-cors",
     });
     
     if (!res.ok) throw new Error('HTTP ' + res.status);
